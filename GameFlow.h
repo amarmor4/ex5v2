@@ -9,6 +9,7 @@
 #include <list>
 #include <vector>
 #include <thread>
+#include<pthread.h>
 #include "Status.h"
 #include "Map.h"
 #include "TaxiCenter.h"
@@ -29,7 +30,8 @@ private:
     int time;
     int portNo;
     Bfs* bfs;
-    vector<unique_ptr<thread>> threads;
+    pthread_t threads[];
+
 
 public:
     GameFlow(Map *map, int portNo);

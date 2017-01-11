@@ -2,6 +2,8 @@
 // Created by yarden95c on 08/12/16.
 //
 
+int option;
+
 #include "GameFlow.h"
 #include "Udp.h"
 #include "Tcp.h"
@@ -20,7 +22,7 @@ GameFlow::GameFlow(Map *map, int portNo1) {
     time = 0;
     portNo = portNo1;
     sockVector=vector<Socket*>();
-    threads = vector<unique_ptr<thread>>();
+    //threads = vector<unique_ptr<thread>>();
 }
 
 /**
@@ -49,6 +51,7 @@ void GameFlow::startGame() {
     //comm->initialize();
     int choice;
     cin >> choice;
+    option = choice;
     while (choice != 7) {
         switch (choice) {
             case 1:
@@ -65,45 +68,76 @@ void GameFlow::startGame() {
                 break;
             case 9:
                 this->moveTheClock();
-                this->sendClientNewLocation();
+                //this->sendClientNewLocation();
             default:
                 break;
         }
         cin >> choice;
     }
 
+    //do join and exit from all threads
     this->killTheClient();
 
 }
 
 class ClientHandler{
 public:
-    void operator()(Socket* sock, TaxiCenter* taxiCenter){
-        char buffer[9999];
-
-        //this->sockVector.push_back(s);
-
-        sock->reciveData(buffer, sizeof(buffer));
-        Driver *d2;
-        boost::iostreams::basic_array_source<char> device(buffer,
-                                                          sizeof(buffer));
-        boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s(
-                device);
-        boost::archive::binary_iarchive ia(s);
-        ia >> d2;
-        taxiCenter->addDriverInfo(d2);
-        //send the cab
-        Cab *cab = taxiCenter->getDriver()->getCab();
-        string serial_str;
-        boost::iostreams::back_insert_device<std::string> inserter(serial_str);
-        boost::iostreams::stream<boost::iostreams::back_insert_device<std
-        ::string> > stream(inserter);
-        boost::archive::binary_oarchive oa(stream);
-        oa << cab;
-        stream.flush();
-        sock->sendData(serial_str);
+    Socket* sock;
+    TaxiCenter* taxiCenter;
+    ClientHandler(Socket* inputSock, TaxiCenter* inputCenter) {
+        this->sock = inputSock;
+        this->taxiCenter = inputCenter;
     }
+
 };
+
+void *test(void* ptr){
+    char buffer[9999];
+    ClientHandler* handler = (ClientHandler*)ptr;
+    //this->sockVector.push_back(s);
+
+    handler->sock->reciveData(buffer, sizeof(buffer));
+    Driver *d2;
+    boost::iostreams::basic_array_source<char> device(buffer,
+                                                      sizeof(buffer));
+    boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s(
+            device);
+    boost::archive::binary_iarchive ia(s);
+    ia >> d2;
+    handler->taxiCenter->addDriverInfo(d2);
+    //send the cab
+    Cab *cab = handler->taxiCenter->getDriver()->getCab();
+    string serial_str;
+    boost::iostreams::back_insert_device<std::string> inserter(serial_str);
+    boost::iostreams::stream<boost::iostreams::back_insert_device<std
+    ::string> > stream(inserter);
+    boost::archive::binary_oarchive oa(stream);
+    oa << cab;
+    stream.flush();
+    handler->sock->sendData(serial_str);
+    cout << *(d2->getCurrentLocation()) << endl;
+
+    while (option != 7) {
+        if (option == 10) { //a flag that we done moving the clock  and
+            // moving one step
+            Point *newLocation = handler->taxiCenter->getDriver()
+                    ->getCurrentLocation();
+            string serial_str;
+            boost::iostreams::back_insert_device<std::string> inserter(serial_str);
+            boost::iostreams::stream<boost::iostreams::back_insert_device<std::string> >
+                    s(inserter);
+            boost::archive::binary_oarchive oa(s);
+            oa << newLocation;
+            s.flush();
+            handler->sock->sendData(serial_str);
+        }
+    }
+
+
+
+    pthread_exit(NULL);
+}
+
 
 /**
  * get a new driver from the client, set him a car and send the cab to the
@@ -114,15 +148,16 @@ void GameFlow::recieveDrivers() {
     cin >> numOfDrivers;
         char buffer[9999];
         //get the driverp
+
     for (int i=0; i<numOfDrivers;i++) {
         this->establishCommunication("TCP");
         this->comm->initialize();
-        threads.emplace_back(new std::thread((ClientHandler()), this->comm,
-                                             this->taxiCenter));
+        ClientHandler* handler = new ClientHandler(this->comm,
+                                                   this->taxiCenter);
+        pthread_create(&this->threads[i], NULL, test, (void*)handler);
         this->portNo++;
-        threads.back()->join();
+        pthread_join(this->threads[i], NULL);
     }
-
     /*
         for (int i=0; i<numOfDrivers;i++){
             this->establishCommunication("TCP");
@@ -212,6 +247,7 @@ void GameFlow::printDriverLocation() {
  * if their time passed make them to move one step
  */
 void GameFlow::moveTheClock() {
+    // bfs threads are over - need to add
     vector<Trip *> trips = taxiCenter->getTrips();
     vector<Driver *> drivers = taxiCenter->getDriversInfo();
     for (int i = 0; i < trips.size(); i++) {
@@ -229,6 +265,7 @@ void GameFlow::moveTheClock() {
         }
     }
     time++;
+    option = 10;
 }
 
 /**
