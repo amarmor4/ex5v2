@@ -18,6 +18,7 @@
 #include "LuxuryCab.h"
 #include "StandardCab.h"
 #include "Socket.h"
+//#include "ClientHandlertest.h"
 
 using namespace std;
 
@@ -26,14 +27,16 @@ private:
     Map *grid;
     TaxiCenter *taxiCenter;
     Socket *comm;
-    vector<Socket *> sockVector;
     int time;
     int portNo;
     Bfs* bfs;
     pthread_t threads[];
-
+    int driversNum;
 
 public:
+    pthread_mutex_t connection_locker;
+    pthread_mutex_t list_locker;
+
     GameFlow(Map *map, int portNo);
 
     void establishCommunication(string str);
@@ -52,9 +55,13 @@ public:
 
     void sendClientNewLocation();
 
-    void killTheClient();
+    void killTheClient(int i);
 
     Socket* getSock();
+
+    bool isFinish10();
+
+    void resetFinish10();
 
     ~GameFlow();
 

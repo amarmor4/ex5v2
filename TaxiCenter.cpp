@@ -211,8 +211,13 @@ void TaxiCenter::popCab() {
  * get the driver
  * @return the first driver in the vector
  */
-Driver *TaxiCenter::getDriver() {
-    return driversInfo[0];
+Driver *TaxiCenter::getDriver(int id) {
+    for (int i=0; i< driversInfo.size();i++)
+    {
+        if(driversInfo[i]->getDriverId()==id){
+            return driversInfo[i];
+        }
+    }
 }
 
 Driver* TaxiCenter::getClosestDriver(Point* start){

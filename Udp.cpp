@@ -28,6 +28,13 @@ Udp::~Udp() {
 	// TODO Auto-generated destructor stub
 }
 
+int Udp::acceptClient(){
+
+}
+
+int Udp::getClientSock(int i) {
+
+}
 /***********************************************************************
 * function name: initialize											   *
 * The Input: none              										   *
@@ -65,7 +72,7 @@ int Udp::initialize() {
 * The Function operation: sending the input data to the socket         *
 * who connect to this socket. check if send successfully				   *
 ***********************************************************************/
-int Udp::sendData(string data) {
+int Udp::sendData(string data, int index) {
 	//initialize the struct
 	struct sockaddr_in sin;
 	memset(&sin, 0, sizeof(sin));
@@ -92,7 +99,7 @@ int Udp::sendData(string data) {
 * The Function operation: getting data from the other socket check if  *
 *  there were no error reciving and print							   *
 ***********************************************************************/
-int Udp::reciveData(char* buffer, int size) {
+int Udp::reciveData(char* buffer, int size, int index) {
 	struct sockaddr_in to;
 	unsigned int to_len = sizeof(struct sockaddr_in);
 	//receive

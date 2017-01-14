@@ -42,7 +42,7 @@ public:
 
     ~TaxiCenter();
 
-    Driver* getDriver();
+    Driver* getDriver(int id);
     Driver* getClosestDriver(Point* start);
 
     void setDriversInfo(const vector<Driver *> &driversInfo);

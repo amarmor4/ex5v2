@@ -223,19 +223,24 @@ int Driver::getNumOfDrives() {
 int Driver::setDataDriver(Socket* sock) {
     char buffer[1024];
     int b;
-    sock->reciveData(buffer, sizeof(buffer));
-    Point * p;
-    boost::iostreams::basic_array_source<char> device1(buffer, sizeof(buffer));
-    boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s2
-            (device1);
-    boost::archive::binary_iarchive ia1(s2);
-    ia1 >> p;
-    if (p!=NULL){
-        this->setCurrLocation(p);
-        delete (p);
-        return 1;
+    try{
+        sock->reciveData(buffer, sizeof(buffer), 0);
+        Point * p;
+        boost::iostreams::basic_array_source<char> device1(buffer, sizeof(buffer));
+        boost::iostreams::stream<boost::iostreams::basic_array_source<char> > s2
+                (device1);
+        boost::archive::binary_iarchive ia1(s2);
+        ia1 >> p;
+        if (p!=NULL) {
+            this->setCurrLocation(p);
+            cout << *p <<endl;
+            delete (p);
+            return 1;
+        }
     }
-    else{
-        return 0;
+    catch (...){
+        cout << "hhhhhh" <<endl;
     }
+    return 0;
+
 }

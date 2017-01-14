@@ -11,6 +11,7 @@
 class Tcp: public Socket {
 private:
 	int descriptorCommunicateClient;
+	vector<int> clientSocks;
 public:
 	/***********************************************************************
 	* function name: Tcp												   *
@@ -34,6 +35,7 @@ public:
 	* socket descriptor.												   *
 	***********************************************************************/
 	int initialize();
+	int acceptClient();
 	/***********************************************************************
 	* function name: sendData											   *
 	* The Input: string representing the data to send		               *
@@ -41,7 +43,7 @@ public:
 	* The Function operation: sending the input data to the socket         *
 	* who connect to this socket. 										   *
 	***********************************************************************/
-	int sendData(string data);
+	int sendData(string data, int index);
 	/***********************************************************************
 	* function name: recive	`											   *
 	* The Input: none										               *
@@ -49,7 +51,10 @@ public:
 	* The Function operation: getting data from the other socket and print *
 	* the data															   *
 	***********************************************************************/
-	int reciveData(char* buffer, int size);
+	int reciveData(char* buffer, int size, int index);
+
+	int getClientSock(int i);
+
 };
 
 #endif /* TCP_H_ */

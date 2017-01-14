@@ -34,17 +34,18 @@ int main(int argc, char *argv[]) {
     s.flush();
 
     // send driver object to server
-    sock->sendData(serial_str);
+    sock->sendData(serial_str, 0);
     // get a cab
 
     // get a cab serial string from server and add it to driver.
-    sock->reciveData(buffer, sizeof(buffer));
+    sock->reciveData(buffer, sizeof(buffer), 0);
     Cab* cab;
     boost::iostreams::basic_array_source<char> device(buffer, sizeof(buffer));
     boost::iostreams::stream<boost::iostreams::basic_array_source<char> > stream1
             (device);
     boost::archive::binary_iarchive ia(stream1);
     ia >> cab;
+    cout << cab->getCabId() <<endl;
     driver->setCab(cab);
 
 
@@ -53,7 +54,6 @@ int main(int argc, char *argv[]) {
     while(b!=0){
         b=driver->setDataDriver(sock);
     }
-
     delete(driver);
     delete(cab);
     delete (sock);

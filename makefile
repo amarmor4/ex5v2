@@ -1,10 +1,10 @@
-all: Server.out Client.out
+all: server.out client.out
 
-Server.out: Server.o Block.o Cab.o Driver.o LuxuryCab.o Point.o StandardCab.o Trip.o Bfs.o GameFlow.o Map.o Matrix.o Passenger.o TaxiCenter.o Socket.o Udp.o
-	g++ -std=c++0x Server.o Block.o Cab.o Driver.o LuxuryCab.o Point.o StandardCab.o Trip.o Bfs.o GameFlow.o Map.o Matrix.o Passenger.o TaxiCenter.o Socket.o Udp.o -lboost_serialization -I. -o Server.out
+server.out: Server.o Block.o Cab.o Driver.o LuxuryCab.o Point.o StandardCab.o Trip.o Bfs.o GameFlow.o Map.o Matrix.o Passenger.o TaxiCenter.o Socket.o Udp.o Tcp.o
+	g++ -std=c++0x Server.o Block.o Cab.o Driver.o LuxuryCab.o Point.o StandardCab.o Trip.o Bfs.o GameFlow.o Map.o Matrix.o Passenger.o TaxiCenter.o Socket.o Udp.o Tcp.o -lboost_serialization -lpthread -I. -o server.out
 
-Client.out: Client.o Block.o Cab.o Driver.o LuxuryCab.o Point.o StandardCab.o Trip.o Map.o Matrix.o Bfs.o Socket.o Udp.o
-	g++ -std=c++0x Client.o Block.o Cab.o Driver.o LuxuryCab.o Point.o StandardCab.o Trip.o Map.o Matrix.o Bfs.o Socket.o Udp.o -lboost_serialization -I. -o Client.out
+client.out: Client.o Block.o Cab.o Driver.o LuxuryCab.o Point.o StandardCab.o Trip.o Map.o Matrix.o Bfs.o Socket.o Udp.o Tcp.o
+	g++ -std=c++0x Client.o Block.o Cab.o Driver.o LuxuryCab.o Point.o StandardCab.o Trip.o Map.o Matrix.o Bfs.o Socket.o Udp.o Tcp.o -lboost_serialization -lpthread -I. -o client.out
 
 Client.o: Client.cpp
 	g++ -std=c++0x -c Client.cpp
@@ -51,11 +51,15 @@ Passenger.o: Passenger.cpp Passenger.h
 TaxiCenter.o: TaxiCenter.cpp TaxiCenter.h
 	g++ -std=c++0x -c TaxiCenter.cpp
 
+
 Socket.o: Socket.cpp Socket.h
 	g++ -std=c++0x -c Socket.cpp
 
 Udp.o: Udp.cpp Udp.h
 	g++ -std=c++0x -c Udp.cpp
+
+Tcp.o: Tcp.cpp Tcp.h
+	g++ -std=c++0x -c Tcp.cpp
 
 clean:
 	rm -f *.o a.out

@@ -14,6 +14,7 @@
 #include <cstring>
 #include <iostream>
 #include <string>
+#include <vector>
 using namespace std;
 
 //return values to each function if error happened
@@ -64,6 +65,7 @@ public:
 	* socket descriptor. pure virtual method							   *
 	***********************************************************************/
 	virtual int initialize() = 0;
+	virtual int acceptClient() = 0;
 	/***********************************************************************
 	* function name: sendData											   *
 	* The Input: string representing the data to send		               *
@@ -71,7 +73,7 @@ public:
 	* The Function operation: sending the input data to the socket         *
 	* who connect to this socket. pure virtual method					   *
 	***********************************************************************/
-	virtual int sendData(string data) = 0;
+	virtual int sendData(string data, int index) = 0;
 	/***********************************************************************
 	* function name: recive	`											   *
 	* The Input: none										               *
@@ -79,7 +81,9 @@ public:
 	* The Function operation: getting data from the other socket and print *
 	* the data															   *
 	***********************************************************************/
-	virtual int reciveData(char* buffer, int size) = 0;
+	virtual int reciveData(char* buffer, int size, int index) = 0;
+
+    virtual int getClientSock(int i) = 0;
 
 
 
