@@ -53,16 +53,17 @@ GameFlow::~GameFlow() {
     option=NULL;
     pthread_mutex_destroy(&this->connection_locker);
     pthread_mutex_destroy(&this->list_locker);
-    delete (taxiCenter);
-    delete (comm);
     delete(bfs);
-    for (int i = 0; i < this->driversNum; i++) {
-        //delete this->threads[i];
-        delete handlers[i];
-        //handlers.pop_back();
-        //finish_10.pop_back();
-        //pthread_exit(&this->threads[i]);
+    delete (comm);
+    delete (taxiCenter);
+
+    while(!handlers.empty()||!finish_10.empty()){
+        ClientHandler *c=handlers.back();
+        handlers.pop_back();
+        delete (c);
+        finish_10.pop_back();
     }
+
 
 }
 
@@ -158,7 +159,7 @@ void *test(void* ptr){
             pthread_mutex_unlock(&handler->flow->list_locker);
         }
     }
-    pthread_exit(NULL);
+    pthread_exit(ptr);
 }
 
 
@@ -170,7 +171,6 @@ void GameFlow::recieveDrivers() {
     int numOfDrivers;
     cin >> numOfDrivers;
     char buffer[9999];
-    //get the driverp
     this->establishCommunication("TCP");
     this->comm->initialize();
     for (int i=0; i<numOfDrivers;i++) {
@@ -179,10 +179,8 @@ void GameFlow::recieveDrivers() {
                                                    this->taxiCenter, this, i);
         handlers.push_back(handler);
         pthread_create(&this->threads[i], NULL, test, (void*)handler);
-        //this->portNo++;
         //pthread_join(this->threads[i], NULL);
         finish_10.push_back(true);
-        //driversNum++;
     }
     driversNum=numOfDrivers;
 }
