@@ -28,6 +28,7 @@ public:
     }
 };
 
+
 vector<ClientHandler*> handlers;
 
 /**
@@ -113,6 +114,12 @@ void GameFlow::startGame() {
         this->killTheClient(i);
         //pthread_join(this->threads[i], NULL);
     }
+}
+
+void *createBfsForTrip(void* ptr) {
+    Trip* trip = (Trip*)ptr;
+    trip->setPath();
+    pthread_exit(ptr);
 }
 
 void *test(void* ptr){
@@ -201,6 +208,8 @@ void GameFlow::insertARide() {
     Trip *trip = new Trip(this->bfs, id, start, end, numOfPassengers, tariff,
                           startTime);
     taxiCenter->addTrip(trip);
+    int tripindex = taxiCenter->numOfTrips();
+    pthread_create(&this->threadsTrip[tripindex-1], NULL, createBfsForTrip, (void*)trip);
     start = NULL;
     end = NULL;
     trip = NULL;
@@ -246,6 +255,9 @@ void GameFlow::printDriverLocation() {
 void GameFlow::moveTheClock() {
     while(!isFinish10()) { }
     // bfs threads are over - need to add
+    for (int i = 0; i <  this->taxiCenter->numOfTrips(); i++) {
+        pthread_join(this->threadsTrip[i], NULL);
+    }
     vector<Trip *> trips = taxiCenter->getTrips();
     vector<Driver *> drivers = taxiCenter->getDriversInfo();
     for (int i = 0; i < trips.size(); i++) {

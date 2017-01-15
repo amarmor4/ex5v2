@@ -5,7 +5,6 @@
 #ifndef TEST1_TRIP_H
 #define TEST1_TRIP_H
 
-
 #include <list>
 #include "Point.h"
 #include "Driver.h"
@@ -29,6 +28,7 @@ private:
     Driver *driver;
     bool isPending;
     int startTime;
+    Bfs *bfs;
     stack<Point*> *path;
     //stack<Point*> *pathFromDriver;
 
@@ -52,7 +52,7 @@ public:
 
     stack<Point *> *getPath();
 
-    void setPath(Bfs* bfs);
+    void setPath();
 
     Trip(Bfs* bfs, int id, Point *start1, Point *end1, int numOfPassengers,
              double tariff1, int startTrip1);

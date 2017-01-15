@@ -21,8 +21,9 @@ Trip::Trip(Bfs* bfs,int id, Point *start1, Point *end1, int numOfPassengers,
     driver = NULL;
     isPending = true;
     startTime = startTrip1;
-    this->setPath(bfs);
-    //pathFromDriver = NULL;
+    //this->setPath(bfs);
+    this->path = NULL;
+    this->bfs = bfs;
 }
 
 /**
@@ -152,8 +153,8 @@ stack<Point *> *Trip::getPath() {
     return path;
 }
 
-void Trip::setPath(Bfs* bfs) {
-    path = bfs->getPath(start, end);
+void Trip::setPath() {
+    path = this->bfs->getPath(start, end);
 }
 
 void Trip::moveOneStep() {

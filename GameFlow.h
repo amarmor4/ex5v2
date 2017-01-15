@@ -31,6 +31,7 @@ private:
     int portNo;
     Bfs* bfs;
     pthread_t threads[];
+    pthread_t threadsTrip[];
     int driversNum;
 
 public:
