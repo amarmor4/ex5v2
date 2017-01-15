@@ -319,9 +319,10 @@ bool GameFlow::isFinish10(){
 
 bool GameFlow::isFinishBuildThread() {
     bool all=true;
-    for(int i=0; i<finishTrips.size(); i++){
-        if(finishTrips[i]==false){
-            all=false;
+    vector<bool>::iterator it;
+    for(it = finishTrips.begin(); it != finishTrips.end(); ++it){
+        if(*it == false){
+            all = false;
             break;
         }
     }
