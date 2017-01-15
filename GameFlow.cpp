@@ -9,7 +9,6 @@
 int option;
 vector<bool> finish_10;
 vector<bool> finishTrips;
-//vector<ClientHandler*> handlers;
 using namespace std;
 
 class ClientHandler{
@@ -33,9 +32,11 @@ class TripHandler{
 public:
     GameFlow* flow;
     Trip* trip;
-    TripHandler(GameFlow* game, Trip* inputTrip) {
+    int index;
+    TripHandler(GameFlow* game, Trip* inputTrip, int i) {
         this->flow = game;
         this->trip = inputTrip;
+        this->index = i;
     }
     ~TripHandler() { }
 };
@@ -122,7 +123,6 @@ void GameFlow::startGame() {
     //do join and exit from all threads
     for(int i=0; i<this->driversNum;i++){
         this->killTheClient(i);
-        //pthread_join(this->threads[i], NULL);
     }
 }
 
@@ -130,7 +130,7 @@ void *createBfsForTrip(void* ptr) {
     TripHandler* handler = (TripHandler*)ptr;
     pthread_mutex_lock(&handler->flow->list_locker);
     handler->trip->setPath();
-    finishTrips.push_back(true);
+    finishTrips[handler->index] = true;
     pthread_mutex_unlock(&handler->flow->list_locker);
     pthread_exit(ptr);
 }
@@ -222,7 +222,8 @@ void GameFlow::insertARide() {
                           startTime);
     taxiCenter->addTrip(trip);
     int tripindex = taxiCenter->numOfTrips();
-    TripHandler* handler = new TripHandler(this,trip);
+    TripHandler* handler = new TripHandler(this,trip,tripindex-1);
+    finishTrips.push_back(false);
     pthread_create(&this->threadsTrip[tripindex-1], NULL, createBfsForTrip, (void*)handler);
     start = NULL;
     end = NULL;

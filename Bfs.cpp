@@ -1,10 +1,5 @@
-//
-// Created by moran on 24/11/16.
-//
-
 #include <iostream>
 #include "Bfs.h"
-
 
 using namespace std;
 
