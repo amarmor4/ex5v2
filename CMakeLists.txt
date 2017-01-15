@@ -41,7 +41,6 @@ set(SOURCE_FILES
         TaxiCenter.h
         Tcp.cpp
         Tcp.h
-        ClientHandlertest.cpp ClientHandlertest.h
         )
 set(BOOST_ROOT CACHE PATH "/usr/include/boost/")
 find_package(Boost 1.57.0 COMPONENTS serialization system)
@@ -71,7 +70,7 @@ add_executable(Client ${SOURCE_FILES}
         Matrix.cpp
         Matrix.h
         Bfs.cpp
-        Bfs.h Udp.cpp Udp.h ClientHandlertest.cpp ClientHandlertest.h)
+        Bfs.h Udp.cpp Udp.h)
 add_executable(Server ${SOURCE_FILES}
         Server.cpp
         Block.cpp
@@ -103,7 +102,6 @@ add_executable(Server ${SOURCE_FILES}
         Passenger.h
         TaxiCenter.cpp
         TaxiCenter.h
-        ClientHandlertest.cpp ClientHandlertest.h
         )
 
 #add_executable(ex5 ${SOURCE_FILES})
