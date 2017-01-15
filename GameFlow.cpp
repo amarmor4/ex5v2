@@ -8,6 +8,7 @@
 
 int option;
 vector<bool> finish_10;
+vector<bool> finishTrips;
 //vector<ClientHandler*> handlers;
 using namespace std;
 
@@ -28,7 +29,16 @@ public:
     }
 };
 
-
+class TripHandler{
+public:
+    GameFlow* flow;
+    Trip* trip;
+    TripHandler(GameFlow* game, Trip* inputTrip) {
+        this->flow = game;
+        this->trip = inputTrip;
+    }
+    ~TripHandler() { }
+};
 vector<ClientHandler*> handlers;
 
 /**
@@ -117,8 +127,11 @@ void GameFlow::startGame() {
 }
 
 void *createBfsForTrip(void* ptr) {
-    Trip* trip = (Trip*)ptr;
-    trip->setPath();
+    TripHandler* handler = (TripHandler*)ptr;
+    pthread_mutex_lock(&handler->flow->list_locker);
+    handler->trip->setPath();
+    finishTrips.push_back(true);
+    pthread_mutex_unlock(&handler->flow->list_locker);
     pthread_exit(ptr);
 }
 
@@ -162,7 +175,7 @@ void *test(void* ptr){
             s.flush();
             pthread_mutex_lock(&handler->flow->list_locker);
             handler->sock->sendData(serial_str, handler->index);
-            finish_10[handler->index]=true;
+            finish_10[handler->index] = true;
             pthread_mutex_unlock(&handler->flow->list_locker);
         }
     }
@@ -209,7 +222,8 @@ void GameFlow::insertARide() {
                           startTime);
     taxiCenter->addTrip(trip);
     int tripindex = taxiCenter->numOfTrips();
-    pthread_create(&this->threadsTrip[tripindex-1], NULL, createBfsForTrip, (void*)trip);
+    TripHandler* handler = new TripHandler(this,trip);
+    pthread_create(&this->threadsTrip[tripindex-1], NULL, createBfsForTrip, (void*)handler);
     start = NULL;
     end = NULL;
     trip = NULL;
@@ -253,11 +267,8 @@ void GameFlow::printDriverLocation() {
  * if their time passed make them to move one step
  */
 void GameFlow::moveTheClock() {
-    while(!isFinish10()) { }
+    while(!isFinish10() && isFinishBuildThread()) { }
     // bfs threads are over - need to add
-    for (int i = 0; i <  this->taxiCenter->numOfTrips(); i++) {
-        pthread_join(this->threadsTrip[i], NULL);
-    }
     vector<Trip *> trips = taxiCenter->getTrips();
     vector<Driver *> drivers = taxiCenter->getDriversInfo();
     for (int i = 0; i < trips.size(); i++) {
@@ -305,6 +316,18 @@ bool GameFlow::isFinish10(){
         }
         return all;
     }
+
+bool GameFlow::isFinishBuildThread() {
+    bool all=true;
+    for(int i=0; i<finishTrips.size(); i++){
+        if(finishTrips[i]==false){
+            all=false;
+            break;
+        }
+    }
+    return all;
+}
+
 
 void GameFlow::resetFinish10(){
     for(int i=0; i<finish_10.size(); i++){

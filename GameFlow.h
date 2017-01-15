@@ -62,6 +62,8 @@ public:
 
     bool isFinish10();
 
+    bool isFinishBuildThread();
+
     void resetFinish10();
 
     ~GameFlow();
