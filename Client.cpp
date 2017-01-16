@@ -45,7 +45,7 @@ int main(int argc, char *argv[]) {
             (device);
     boost::archive::binary_iarchive ia(stream1);
     ia >> cab;
-    cout << cab->getCabId() <<endl;
+    //cout << cab->getCabId() <<endl;
     driver->setCab(cab);
 
 

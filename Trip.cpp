@@ -11,7 +11,7 @@
  * @param numOfPassengers
  * @return
  */
-Trip::Trip(Bfs* bfs,int id, Point *start1, Point *end1, int numOfPassengers,
+Trip::Trip(Bfs* bfs1,int id, Point *start1, Point *end1, int numOfPassengers,
            double tariff1, int startTrip1) {
     tripId = id;
     start = start1;
@@ -23,7 +23,7 @@ Trip::Trip(Bfs* bfs,int id, Point *start1, Point *end1, int numOfPassengers,
     startTime = startTrip1;
     //this->setPath(bfs);
     this->path = NULL;
-    this->bfs = bfs;
+    this->bfs = bfs1;
 }
 
 /**

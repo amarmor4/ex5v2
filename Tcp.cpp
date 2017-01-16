@@ -100,11 +100,11 @@ int Tcp::acceptClient(){
 		unsigned int addr_len = sizeof(client_sin);
 		this->descriptorCommunicateClient = accept(this->socketDescriptor,
 				(struct sockaddr *) &client_sin, &addr_len);
-        this->clientSocks.push_back(this->descriptorCommunicateClient);
 		if (this->descriptorCommunicateClient < 0) {
 			//return an error represent error at this method
 			return ERROR_ACCEPT;
 		}
+		this->clientSocks.push_back(this->descriptorCommunicateClient);
 }
 /***********************************************************************
 * function name: sendData											   *
@@ -118,9 +118,19 @@ int Tcp::sendData(string data, int index) {
 	const char * datas = data.c_str();
     int sent_bytes;
     if (this->isServer) {
+		try {
         sent_bytes = send(this->clientSocks[index], datas, data_len, 0);
+		} catch (...){
+			cout << "send recv" << endl;
+			return ERROR_RECIVE;
+		}
     } else {
+		try {
         sent_bytes = send(this->socketDescriptor, datas, data_len, 0);
+		} catch (...){
+			cout << "send recv" << endl;
+			return ERROR_RECIVE;
+		}
     }
 	if (sent_bytes < 0) {
 		//return an error represent error at this method
@@ -139,11 +149,23 @@ int Tcp::sendData(string data, int index) {
 ***********************************************************************/
 int Tcp::reciveData(char* buffer, int size, int index) {
     int read_bytes;
-    if (isServer) {
-        read_bytes = recv(this->clientSocks[index], buffer, size, 0);
-    } else {
-        read_bytes = recv(this->socketDescriptor, buffer, size, 0);
-    }
+
+		if (isServer) {
+			try {
+			read_bytes = recv(this->clientSocks[index], buffer, size, 0);
+			} catch (...){
+				cout << "cant recv" << endl;
+				return ERROR_RECIVE;
+			}
+		} else {
+			try {
+			read_bytes = recv(this->socketDescriptor, buffer, size, 0);
+			} catch (...){
+				cout << "cant recv" << endl;
+				return ERROR_RECIVE;
+			}
+		}
+
 	//checking the errors
 	if (read_bytes == 0) {
 		return CONNECTION_CLOSED;

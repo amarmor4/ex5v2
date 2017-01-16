@@ -233,7 +233,7 @@ int Driver::setDataDriver(Socket* sock) {
         ia1 >> p;
         if (p!=NULL) {
             this->setCurrLocation(p);
-            cout << *p <<endl;
+            //cout << *p <<endl;
             delete (p);
             return 1;
         }

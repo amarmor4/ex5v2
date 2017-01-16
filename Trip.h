@@ -20,6 +20,7 @@ using namespace std;
  */
 class Trip {
 private:
+    Bfs* bfs;
     int tripId;
     Point *start;
     Point *end;
@@ -28,7 +29,6 @@ private:
     Driver *driver;
     bool isPending;
     int startTime;
-    Bfs *bfs;
     stack<Point*> *path;
     //stack<Point*> *pathFromDriver;
 
@@ -73,6 +73,7 @@ public:
     int getStartTime() const;
 
     void moveOneStep();
+
     void setStartTime(int startTime);
 
     void setDriver(Driver *driver1);

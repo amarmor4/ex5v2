@@ -9,6 +9,7 @@
 int option;
 vector<bool> finish_10;
 vector<bool> finishTrips;
+//vector<ClientHandler*> handlers;
 using namespace std;
 
 class ClientHandler{
@@ -28,6 +29,8 @@ public:
     }
 };
 
+vector<ClientHandler*> handlers;
+
 class TripHandler{
 public:
     GameFlow* flow;
@@ -40,7 +43,6 @@ public:
     }
     ~TripHandler() { }
 };
-vector<ClientHandler*> handlers;
 
 /**
  * constractur of game flow.
@@ -53,6 +55,7 @@ GameFlow::GameFlow(Map *map, int portNo1) {
     this->comm = NULL;
     this->time = 0;
     this->driversNum=0;
+    this->tripsNum=0;
     this->portNo = portNo1;
     pthread_mutex_init(&this->connection_locker, 0);
     pthread_mutex_init(&this->list_locker, 0);
@@ -93,8 +96,6 @@ void GameFlow::establishCommunication(string str) {
  * menu optinos of program
  */
 void GameFlow::startGame() {
-    //establishCommunication();
-    //comm->initialize();
     int choice;
     cin >> choice;
     option = choice;
@@ -104,6 +105,7 @@ void GameFlow::startGame() {
                 this->recieveDrivers();
                 break;
             case 2:
+                finishTrips.push_back(false);
                 this->insertARide();
                 break;
             case 3:
@@ -123,16 +125,8 @@ void GameFlow::startGame() {
     //do join and exit from all threads
     for(int i=0; i<this->driversNum;i++){
         this->killTheClient(i);
+        //pthread_join(this->threads[i], NULL);
     }
-}
-
-void *createBfsForTrip(void* ptr) {
-    TripHandler* handler = (TripHandler*)ptr;
-    pthread_mutex_lock(&handler->flow->list_locker);
-    handler->trip->setPath();
-    finishTrips[handler->index] = true;
-    pthread_mutex_unlock(&handler->flow->list_locker);
-    pthread_exit(ptr);
 }
 
 void *test(void* ptr){
@@ -175,13 +169,21 @@ void *test(void* ptr){
             s.flush();
             pthread_mutex_lock(&handler->flow->list_locker);
             handler->sock->sendData(serial_str, handler->index);
-            finish_10[handler->index] = true;
+            finish_10[handler->index]=true;
             pthread_mutex_unlock(&handler->flow->list_locker);
         }
     }
     pthread_exit(ptr);
 }
 
+void *createBfsForTrip(void* ptr) {
+    TripHandler* handlerT = (TripHandler*)ptr;
+    pthread_mutex_lock(&handlerT->flow->list_locker);
+    handlerT->trip->setPath();
+    finishTrips[handlerT->index] = true;
+    pthread_mutex_unlock(&handlerT->flow->list_locker);
+    pthread_exit(ptr);
+}
 
 /**
  * get a new driver from the client, set him a car and send the cab to the
@@ -193,6 +195,7 @@ void GameFlow::recieveDrivers() {
     char buffer[9999];
     this->establishCommunication("TCP");
     this->comm->initialize();
+    int tripIndex=this->tripsNum;
     for (int i=0; i<numOfDrivers;i++) {
         this->comm->acceptClient();
         ClientHandler* handler = new ClientHandler(this->comm,
@@ -202,7 +205,8 @@ void GameFlow::recieveDrivers() {
         //pthread_join(this->threads[i], NULL);
         finish_10.push_back(true);
     }
-    driversNum=numOfDrivers;
+    this->driversNum=numOfDrivers;
+    this->tripsNum=tripIndex;
 }
 
 /**
@@ -218,13 +222,17 @@ void GameFlow::insertARide() {
         >> numOfPassengers >> c >> tariff >> c >> startTime;
     Point *start = new Point(xStart, yStart);
     Point *end = new Point(xEnd, yEnd);
+    int tripIndex=this->tripsNum;
+    int numDrivers=this->driversNum;
     Trip *trip = new Trip(this->bfs, id, start, end, numOfPassengers, tariff,
                           startTime);
+    //trip->setPath();
     taxiCenter->addTrip(trip);
-    int tripindex = taxiCenter->numOfTrips();
-    TripHandler* handler = new TripHandler(this,trip,tripindex-1);
-    finishTrips.push_back(false);
-    pthread_create(&this->threadsTrip[tripindex-1], NULL, createBfsForTrip, (void*)handler);
+    TripHandler* handler = new TripHandler(this,trip,tripIndex);
+    pthread_create(&this->threadsTrip[tripIndex], NULL, createBfsForTrip,
+                   (void*)handler);
+    this->tripsNum=tripIndex+1;
+    this->driversNum=numDrivers;
     start = NULL;
     end = NULL;
     trip = NULL;
@@ -268,7 +276,7 @@ void GameFlow::printDriverLocation() {
  * if their time passed make them to move one step
  */
 void GameFlow::moveTheClock() {
-    while(!isFinish10() && isFinishBuildThread()) { }
+    while(!isFinish10() && !isFinishBuildThread()) { }
     // bfs threads are over - need to add
     vector<Trip *> trips = taxiCenter->getTrips();
     vector<Driver *> drivers = taxiCenter->getDriversInfo();
@@ -320,10 +328,9 @@ bool GameFlow::isFinish10(){
 
 bool GameFlow::isFinishBuildThread() {
     bool all=true;
-    vector<bool>::iterator it;
-    for(it = finishTrips.begin(); it != finishTrips.end(); ++it){
-        if(*it == false){
-            all = false;
+    for(int i=0; i < this->tripsNum; i++){
+        if(finishTrips[i]==false){
+            all=false;
             break;
         }
     }

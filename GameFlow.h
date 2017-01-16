@@ -33,6 +33,7 @@ private:
     pthread_t threads[];
     pthread_t threadsTrip[];
     int driversNum;
+    int tripsNum;
 
 public:
     pthread_mutex_t connection_locker;
