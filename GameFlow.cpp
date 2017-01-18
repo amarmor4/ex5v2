@@ -263,11 +263,15 @@ void GameFlow::printDriverLocation() {
     vector<Driver *> v = taxiCenter->getDriversInfo();
     int driverId;
     cin >> driverId;
+    /*
+    while(!isFinishBuildThread()){}
     for (vector<Driver *>::iterator it = v.begin(); it != v.end(); it++) {
         if ((*it)->getDriverId() == driverId) {
             cout << *((*it)->getCurrentLocation()) << endl;
         }
     }
+     */
+    cout << *(taxiCenter->getDriver(driverId)->getCurrentLocation()) << endl;
 }
 
 /**

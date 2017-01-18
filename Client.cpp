@@ -23,7 +23,7 @@ int main(int argc, char *argv[]) {
     //Socket *udp = new Udp(0, atoi(argv[2]));
     Socket *sock=new Tcp(0,atoi(argv[2]));
     sock->initialize();
-    char buffer[1024];
+    char buffer[9999];
 
     // serial driver object to string
     string serial_str;

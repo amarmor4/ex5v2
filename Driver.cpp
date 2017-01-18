@@ -221,7 +221,7 @@ int Driver::getNumOfDrives() {
 }
 
 int Driver::setDataDriver(Socket* sock) {
-    char buffer[1024];
+    char buffer[9999];
     int b;
     try{
         sock->reciveData(buffer, sizeof(buffer), 0);
